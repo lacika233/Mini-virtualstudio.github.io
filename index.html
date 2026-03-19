@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini VS – Multi-language Editor</title>
+
+  <!-- ZIP készítéshez szükséges könyvtár -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Consolas, monospace; }
+    body { display: flex; flex-direction: column; height: 100vh; background: #1e1e1e; color: #ddd; }
+    header { padding: 8px 12px; background: #252526; color: #fff; font-weight: bold; }
+    .container { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .tabs { display: flex; background: #2d2d30; border-bottom: 1px solid #3c3c3c; overflow-x: auto; }
+    .tab { padding: 8px 16px; cursor: pointer; border-right: 1px solid #3c3c3c; user-select: none; font-size: 14px; white-space: nowrap; }
+    .tab.active { background: #1e1e1e; color: #fff; }
+    .editor-area { display: flex; flex: 0.4; overflow: hidden; }
+    .editor-panel { flex: 1; display: flex; flex-direction: column; background: #1e1e1e; }
+    textarea { flex: 1; width: 100%; background: #1e1e1e; color: #dcdcdc; border: none; padding: 8px; resize: none; font-size: 14px; line-height: 1.4; outline: none; tab-size: 2; }
+    .editor-panel.hidden { display: none; }
+    .buttons { display: flex; gap: 8px; padding: 6px 8px; background: #252526; border-top: 1px solid #3c3c3c; }
+    .buttons button { background: #0e639c; border: none; color: #fff; padding: 4px 10px; font-size: 13px; cursor: pointer; border-radius: 2px; }
+    .buttons button:hover { background: #1177bb; }
+    .preview { flex: 1.6; border-top: 1px solid #3c3c3c; background: #1e1e1e; }
+    .preview-header { padding: 4px 8px; background: #252526; font-size: 13px; border-bottom: 1px solid #3c3c3c; }
+    iframe { width: 100%; height: calc(100% - 24px); border: none; background: #fff; }
+  </style>
+</head>
+<body>
+  <header>Mini Visual Studio – Multi-language Editor + előnézet</header>
+
+  <div class="container">
+
+    <div class="tabs">
+      <div class="tab active" data-target="html">HTML</div>
+      <div class="tab" data-target="css">CSS</div>
+      <div class="tab" data-target="js">JavaScript</div>
+
+      <div class="tab" data-target="python">Python</div>
+      <div class="tab" data-target="php">PHP</div>
+      <div class="tab" data-target="c">C</div>
+      <div class="tab" data-target="cpp">C++</div>
+      <div class="tab" data-target="cs">C#</div>
+      <div class="tab" data-target="java">Java</div>
+      <div class="tab" data-target="json">JSON</div>
+      <div class="tab" data-target="xml">XML</div>
+      <div class="tab" data-target="md">Markdown</div>
+      <div class="tab" data-target="sql">SQL</div>
+      <div class="tab" data-target="bash">Bash</div>
+      <div class="tab" data-target="ts">TypeScript</div>
+      <div class="tab" data-target="rust">Rust</div>
+      <div class="tab" data-target="go">Go</div>
+      <div class="tab" data-target="lua">Lua</div>
+      <div class="tab" data-target="ruby">Ruby</div>
+      <div class="tab" data-target="kotlin">Kotlin</div>
+      <div class="tab" data-target="swift">Swift</div>
+    </div>
+
+    <div class="editor-area">
+
+      <!-- HTML -->
+      <div class="editor-panel" id="panel-html">
+        <textarea id="html-code">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Teszt oldal</title>
+</head>
+<body>
+  <h1>Hello világ!</h1>
+  <p>Ezt a mini editorból írtad.</p>
+</body>
+</html>
+        </textarea>
+        <div class="buttons">
+          <button onclick="updatePreview()">Előnézet frissítése</button>
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <!-- CSS -->
+      <div class="editor-panel hidden" id="panel-css">
+        <textarea id="css-code">
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
+  color: #333;
+}
+h1 { color: #007acc; }
+        </textarea>
+        <div class="buttons">
+          <button onclick="updatePreview()">Előnézet frissítése</button>
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <!-- JS -->
+      <div class="editor-panel hidden" id="panel-js">
+        <textarea id="js-code">
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('JavaScript fut!');
+});
+        </textarea>
+        <div class="buttons">
+          <button onclick="updatePreview()">Előnézet frissítése</button>
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <!-- EXTRA NYELVEK -->
+      <div class="editor-panel hidden" id="panel-python">
+        <textarea id="python-code">print("Hello Python")</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-php">
+        <textarea id="php-code"><?php echo "Hello PHP"; ?></textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-c">
+        <textarea id="c-code">#include <stdio.h>
+int main(){ printf("Hello C"); }</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-cpp">
+        <textarea id="cpp-code">#include <iostream>
+int main(){ std::cout<<"Hello C++"; }</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-cs">
+        <textarea id="cs-code">Console.WriteLine("Hello C#");</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-java">
+        <textarea id="java-code">class Main{ public static void main(String[]a){ System.out.println("Hello Java"); }}</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-json">
+        <textarea id="json-code">{ "hello": "json" }</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-xml">
+        <textarea id="xml-code"><root>Hello XML</root></textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-md">
+        <textarea id="md-code"># Hello Markdown</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-sql">
+        <textarea id="sql-code">SELECT * FROM table;</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-bash">
+        <textarea id="bash-code">echo "Hello Bash"</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-ts">
+        <textarea id="ts-code">console.log("Hello TS");</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-rust">
+        <textarea id="rust-code">fn main(){ println!("Hello Rust"); }</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-go">
+        <textarea id="go-code">package main
+import "fmt"
+func main(){ fmt.Println("Hello Go") }</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-lua">
+        <textarea id="lua-code">print("Hello Lua")</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-ruby">
+        <textarea id="ruby-code">puts "Hello Ruby"</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-kotlin">
+        <textarea id="kotlin-code">fun main(){ println("Hello Kotlin") }</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+      <div class="editor-panel hidden" id="panel-swift">
+        <textarea id="swift-code">print("Hello Swift")</textarea>
+        <div class="buttons">
+          <button onclick="downloadAll()">Mind letöltése ZIP-ben</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="preview">
+      <div class="preview-header">Előnézet</div>
+      <iframe id="preview-frame"></iframe>
+    </div>
+
+  </div>
+
+  <script>
+    // Tab váltás
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.editor-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const target = tab.getAttribute('data-target');
+        panels.forEach(p => p.classList.add('hidden'));
+        const panel = document.getElementById('panel-' + target);
+        if (panel) panel.classList.remove('hidden');
+      });
+    });
+
+    // ZIP-ben letöltés – minden nyelv külön fájlban
+    function downloadAll() {
+      const zip = new JSZip();
+
+      const get = id => document.getElementById(id)?.value || "";
+
+      const files = {
+        "index.html": get("html-code"),
+        "style.css": get("css-code"),
+        "script.js": get("js-code"),
+        "python.py": get("python-code"),
+        "php.php": get("php-code"),
+        "main.c": get("c-code"),
+        "main.cpp": get("cpp-code"),
+        "program.cs": get("cs-code"),
+        "Main.java": get("java-code"),
+        "data.json": get("json-code"),
+        "data.xml": get("xml-code"),
+        "README.md": get("md-code"),
+        "query.sql": get("sql-code"),
+        "script.sh": get("bash-code"),
+        "app.ts": get("ts-code"),
+        "main.rs": get("rust-code"),
+        "main.go": get("go-code"),
+        "script.lua": get("lua-code"),
+        "app.rb": get("ruby-code"),
+        "main.kt": get("kotlin-code"),
+        "main.swift": get("swift-code")
+      };
+
+      for (let name in files) {
+        zip.file(name, files[name]);
+      }
+
+      zip.generateAsync({ type: "blob" }).then(content => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(content);
+        a.download = "project.zip";
+        a.click();
+      });
+    }
+
+    // Előnézet frissítése – HTML + CSS + JS
+    function updatePreview() {
+      const html = document.getElementById('html-code').value;
+      const css = document.getElementById('css-code').value;
+      const js = document.getElementById('js-code').value;
+
+      const full = `
+        ${html}
+        <style>${css}</style>
+        <script>
+        ${js}
+        <\/script>
+      `;
+
+      const iframe = document.getElementById('preview-frame');
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(full);
+      doc.close();
+    }
+
+    // Induláskor egyszer frissítjük az előnézetet
+    updatePreview();
+  </script>
+</body>
+</html>
